@@ -43,26 +43,14 @@ WEIGHTING = .1
 OFFLINE_INDEX = 6
 
 
-# def original_pow_switch(argument):
-#     switcher = {0: "關",
-#                 1: "開"}
-#     return switcher[argument]
-#
-#
-# def original_wind_mode(argument):
-#     switcher = {0: "一般風",
-#                 1: "自然風",
-#                 2: "睡眠風"}
-#     return switcher[argument]
-#
-#
-# def original_turn_direction(argument):
-#     switcher = {0: "關",
-#                 1: "開", }
-#     return switcher[argument]
-
 
 def autron_payload(mac, user):
+    """
+    輸出樣式
+    :param mac: string - device_id;
+    :param user: string - 使用著帳號
+    :return: dict 輸出樣式
+    """
     mode1 = fan_status[mac]['mode1']
     if fan_status[mac]['eco']:
         mode1 = '4'
@@ -91,12 +79,18 @@ def autron_payload(mac, user):
 
 
 def pow_switch(argument):
+    """
+    狀態轉換
+    """
     switcher = {0: False,
                 1: True}
     return switcher[argument]
 
 
 def wind_mode(argument):
+    """
+    狀態轉換
+    """
     switcher = {0: '2',
                 1: '3',
                 2: '1'}
@@ -104,12 +98,18 @@ def wind_mode(argument):
 
 
 def turn_direction(argument):
+    """
+    狀態轉換
+    """
     switcher = {0: False,
                 1: True, }
     return switcher[argument]
 
 
 def light_mode(argument):
+    """
+    狀態轉換
+    """
     light = {
         0: '1',
         1: '2',
@@ -117,15 +117,10 @@ def light_mode(argument):
     }
     return light[argument]
 
-
-# def speed_parsing(argument):
-#     if argument < 9:
-#         return '1'
-#     elif argument < 17:
-#         return '2'
-#     else:
-#         return '3'
 def speed_parsing(argument):
+    """
+    狀態轉換
+    """
     if argument == 0:
         argument = 1
     return str(argument)
@@ -146,53 +141,79 @@ def reset_dirty(mac):
 
 
 def change_switch_status(mac, status_index):
+    """
+    更新啟動狀態
+    """
     logging.debug(f'{mac}: change_switch_status to {pow_switch(status_index)}')
     fan_status[mac]['on'] = pow_switch(status_index)
     mark_dirty(mac)
 
 
 def change_mode_status(mac, status_index):
+    """
+    更新模式狀態
+    """
     logging.debug(f'{mac}: change_mode_status to {wind_mode(status_index)}')
     fan_status[mac]['mode1'] = wind_mode(status_index)
     mark_dirty(mac)
 
 
 def change_speed_status(mac, status_index):
+    """
+    更新風速狀態
+    """
     logging.debug(f'{mac}: change_speed_status to {speed_parsing(status_index)}')
     fan_status[mac]['speed_mode2'] = speed_parsing(status_index)
     mark_dirty(mac)
 
 
 def change_sway_status(mac, status_index):
+    """
+    更新擺動狀態
+    """
     logging.debug(f'{mac}: change_sway_status to {turn_direction(status_index)}')
     fan_status[mac]['sway_toggle1'] = turn_direction(status_index)
     mark_dirty(mac)
 
 
 def change_online_status(mac, status_index: bool):
+    """
+    更新在線狀態
+    """
     logging.debug(f'{mac}: change_online_status to {status_index}')
     fan_status[mac]['online'] = status_index
     mark_dirty(mac)
 
 
 def change_light_status(mac, status_index):
+    """
+    更新LED狀態
+    """
     logging.debug(f'{mac}: change_light_status to {status_index}')
     fan_status[mac]['light_mode3'] = light_mode(status_index)
     mark_dirty(mac)
 
 
 def change_eco_status(mac, status_index):
+    """
+    更新模式狀態(ECO)
+    """
     logging.debug(f'{mac}: change_eco_status to {status_index}')
     fan_status[mac]['eco'] = status_index
     mark_dirty(mac)
 
 def change_temperatureAmbientCelsius_status(mac, status_index):
+    """
+    更新目前溫度
+    """
     logging.debug(f'{mac}: change_temperatureAmbientCelsius_status to {status_index}')
     fan_status[mac]['temperatureAmbientCelsius'] = status_index
     mark_dirty(mac)
 
-# 刪除已完成的amiba_payloads
 def remove_amiba_payloads(mac):
+    """
+    刪除已完成的 amiba_payloads
+    """
     logging.debug(f'{mac} -> del amiba_payloads[{mac}][0] : {amiba_payloads[mac][0]}')
     del amiba_payloads[mac][0]
     size = len(amiba_payloads[mac])
@@ -206,6 +227,9 @@ def remove_amiba_payloads(mac):
 # initialization account/mac data
 @timer
 async def get_fan_mac():
+    """
+    抓使用者機器device_id
+    """
     dev = 'fan'
     async with aiohttp.ClientSession() as session:
         async with session.post(HERAN_URL, data=VAL) as her_resp:
